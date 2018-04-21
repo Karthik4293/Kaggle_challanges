@@ -21,6 +21,8 @@ from sklearn.decomposition.pca import PCA
 from sklearn.linear_model.logistic import LogisticRegression
 from sklearn.pipeline import Pipeline
 
+import warnings
+
 start_time = time.clock()
 
 
@@ -50,7 +52,9 @@ def img_compress(img, x_bins=100,y_bins=100):
     
     for i in range(y_bins):
         for j in range(x_bins):
-            temp = np.mean(img[y_splits[i]:y_splits[i+1],
+            with warnings.catch_warnings():
+                 warnings.simplefilter("ignore", category=RuntimeWarning)
+                 temp = np.mean(img[y_splits[i]:y_splits[i+1],
                                       x_splits[j]:x_splits[j+1]])
             if math.isnan(temp):
                 if y_splits[i]==y_splits[i+1]:
@@ -110,9 +114,11 @@ df2 = pd.DataFrame(data = filenames, columns = ['FileName'])
 data1 = pd.concat([df2,df1],axis = 1)
 #Obtain filenames, indexed by whale IDs
 data2 = pd.read_csv('./train.csv',names = ['FileName','Landmark'])
+
 #Map whale IDs to images via filenames (index of data1 is matched to value of data2)
 data = data2.merge(data1, on = 'FileName')
 data = data.drop('FileName',axis = 1)
+
 del compressed_train_imgs, df1, df2, data1, data2
 
 #Extract training examples and labels, and get test set.
@@ -165,17 +171,17 @@ print("Predictions made on test set.", "Time:", time.clock()-start_time)
 
 #Extract top 5 results
 results = pd.DataFrame(data = [clf.classes_[np.argsort(y_preds[i,:])[-5:]] for i in range(y_preds.shape[0])],
-                       index = filenames_test, header = False)
+                       index = filenames_test)
 def list_to_str(L):
     string = ""
     for word in L:
-        string = string + word + " "
+        string =  word + " "         
     return(string)
         
 results2 = pd.DataFrame(data = [list_to_str(results.iloc[i].values) for i in range(results.shape[0])],
-                        index = filenames_test,columns = ['Id'])
+                        index = filenames_test,columns = ['Landmark'])
  
-results2.to_csv('submission.csv', sep = ',', index_label = 'Image', header = True)
+results2.to_csv('results.csv', sep = ',', index_label = 'Image', header = True)
 
 print("Done.", "Time:", time.clock()-start_time)
 
