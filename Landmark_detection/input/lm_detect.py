@@ -104,7 +104,7 @@ del imgs_train
 
 
 
-#Extract filenames to later associate to whale IDs
+#Extract filenames to later associate to landmark IDs
 filenames = [file for file in os.listdir(train_dir)]
 filenames = [filenames[i] for i in good_pics]
 filenames_test = [file for file in os.listdir(test_dir)]
@@ -112,7 +112,7 @@ filenames_test = [file for file in os.listdir(test_dir)]
 df1 = pd.DataFrame(data = [img.ravel() for img in compressed_train_imgs])
 df2 = pd.DataFrame(data = filenames, columns = ['FileName'])
 data1 = pd.concat([df2,df1],axis = 1)
-#Obtain filenames, indexed by whale IDs
+#Obtain filenames, indexed by landmark IDs
 data2 = pd.read_csv('./train.csv',names = ['FileName','Landmark'])
 
 #Map whale IDs to images via filenames (index of data1 is matched to value of data2)
